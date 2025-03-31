@@ -10,26 +10,37 @@ const getDashboardData = async (query) => {
         const weatherPromise = fetchJson(`https://boolean-spec-frontend.vercel.app/freetestapi/weathers?search=${query}`)
         const airportPromise = fetchJson(`https://boolean-spec-frontend.vercel.app/freetestapi/airports?search=${query}`)
 
-        const [destination, weather, airport] = await Promise.all([destinationPromise, weatherPromise, airportPromise])
+        const [destinations, weathers, airports] = await Promise.all([destinationPromise, weatherPromise, airportPromise])
+
+        const destination = destinations[0]
+        const weather = weathers[0]
+        const airport = airports[0]
+
         return {
-            city: destination[0].name,
-            country: destination[0].country,
-            temperature: weather[0].temperature,
-            weather: weather[0].weather_description,
-            airport: airport[0].name
+            city: destination ? destination.name : null,
+            country: destination ? destination.country : null,
+            temperature: weather ? weather.temperature : null,
+            weather: weather ? weather.weather_description : null,
+            airport: airport ? airport.name : null
         }
     } catch (error) {
-        throw new Error('Errore nel recupero dei dati:', error.message)
+        throw new Error(`Errore nel recupero dei dati: ${error.message}`)
     }
 }
 
-getDashboardData('london')
+getDashboardData('vienna')
     .then(data => {
         console.log('Dashboard data:', data)
-        console.log(
-            `${data.city} is in ${data.country}.\n` +
-            `Today there are ${data.temperature} degrees and the weather is ${data.weather}\n` +
-            `The main airport is ${data.airport}`
-        )
+        let sentence = ''
+        if(data.city !== null && data.country !== null){
+            sentence += `${data.city} is in ${data.country}.\n`
+        }
+        if(data.temperature !== null && data.weather !== null){
+            sentence += `Today there are ${data.temperature} degrees and the weather is ${data.weather}\n`
+        }
+        if(data.airport !== null) {
+            sentence += `The main airport is ${data.airport}`
+        }
+        console.log(sentence)
     })
     .catch(error => console.error(error))
